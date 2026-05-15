@@ -72,39 +72,40 @@ function Btn({ children, onClick, variant='primary', disabled, full, style={} })
   return <button onClick={disabled?undefined:onClick} style={{...base,...v[variant]}}>{children}</button>;
 }
 
-function Logo({ dark=true, size=1 }) {
+function Logo({ dark=true }) {
   const fg = dark ? '#fff' : C.ink;
-  const ringStroke = dark ? 'rgba(245,240,232,0.2)' : 'rgba(26,26,26,0.15)';
-  const ringDash = dark ? 'rgba(245,240,232,0.1)' : 'rgba(26,26,26,0.08)';
-  const arcText = dark ? 'rgba(245,240,232,0.6)' : 'rgba(26,26,26,0.5)';
+  const ringStroke = dark ? 'rgba(245,240,232,0.25)' : 'rgba(26,26,26,0.18)';
+  const ringDash = dark ? 'rgba(245,240,232,0.12)' : 'rgba(26,26,26,0.1)';
+  const arcText = dark ? 'rgba(245,240,232,0.65)' : 'rgba(26,26,26,0.55)';
   const bgFill = dark ? 'rgba(245,240,232,0.06)' : 'rgba(26,26,26,0.04)';
-  const w = 44 * size, h = 44 * size;
-  const cx = 22 * size, cy = 22 * size, r = 19 * size;
+  // Fixed dimensions - no scaling that causes skew
+  const S = 52; // seal size
+  const cx = S/2, cy = S/2, r = S/2 - 2;
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:10*size }}>
-      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" style={{ flexShrink:0 }}>
+    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+      <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`} fill="none" style={{ flexShrink:0 }}>
         <defs>
-          <path id={`tA${size}`} d={`M ${cx-r+3*size},${cy} A ${r-3*size},${r-3*size} 0 0,1 ${cx+r-3*size},${cy}`}/>
-          <path id={`bA${size}`} d={`M ${cx-r+3*size},${cy} A ${r-3*size},${r-3*size} 0 0,0 ${cx+r-3*size},${cy}`}/>
+          <path id="tArc" d={`M ${cx-r+4},${cy} A ${r-4},${r-4} 0 0,1 ${cx+r-4},${cy}`}/>
+          <path id="bArc" d={`M ${cx-r+4},${cy} A ${r-4},${r-4} 0 0,0 ${cx+r-4},${cy}`}/>
         </defs>
-        <circle cx={cx} cy={cy} r={r} fill={bgFill} stroke={ringStroke} strokeWidth={1.5*size}/>
-        <circle cx={cx} cy={cy} r={r-5*size} fill="none" stroke={ringDash} strokeWidth={0.75*size} strokeDasharray={`${2*size} ${3*size}`}/>
-        <text fontFamily="Arial" fontSize={4.5*size} fontWeight="700" letterSpacing={1*size} fill={arcText} textAnchor="middle">
-          <textPath href={`#tA${size}`} startOffset="50%">WASHINGTON HTS</textPath>
+        <circle cx={cx} cy={cy} r={r} fill={bgFill} stroke={ringStroke} strokeWidth="1.5"/>
+        <circle cx={cx} cy={cy} r={r-5} fill="none" stroke={ringDash} strokeWidth="0.75" strokeDasharray="2 3"/>
+        <text fontFamily="Arial" fontSize="5" fontWeight="700" letterSpacing="1.2" fill={arcText} textAnchor="middle">
+          <textPath href="#tArc" startOffset="50%">WASHINGTON HTS</textPath>
         </text>
-        <text fontFamily="Arial" fontSize={4*size} fontWeight="600" letterSpacing={1*size} fill={arcText} textAnchor="middle">
-          <textPath href={`#bA${size}`} startOffset="50%">· EST. 2026 ·</textPath>
+        <text fontFamily="Arial" fontSize="4.5" fontWeight="600" letterSpacing="1" fill={arcText} textAnchor="middle">
+          <textPath href="#bArc" startOffset="50%">· EST. 2026 ·</textPath>
         </text>
-        <polygon points={`${cx},${cy-10*size} ${cx-3*size},${cy-6*size} ${cx+3*size},${cy-6*size}`} fill="#C8912A"/>
-        <text x={cx} y={cy+5*size} fontFamily="Georgia,'Times New Roman',serif" fontWeight="700"
-          fontSize={10*size} textAnchor="middle" fill="#C8553D" letterSpacing={-0.5*size}>WU</text>
-        <line x1={cx-7*size} y1={cy+7*size} x2={cx+7*size} y2={cy+7*size} stroke="rgba(200,85,61,0.3)" strokeWidth={0.75*size}/>
+        <polygon points={`${cx},${cy-11} ${cx-3.5},${cy-6.5} ${cx+3.5},${cy-6.5}`} fill="#C8912A"/>
+        <text x={cx} y={cy+6} fontFamily="Georgia,'Times New Roman',serif" fontWeight="700"
+          fontSize="12" textAnchor="middle" fill="#C8553D" letterSpacing="-0.5">WU</text>
+        <line x1={cx-8} y1={cy+8} x2={cx+8} y2={cy+8} stroke="rgba(200,85,61,0.3)" strokeWidth="0.75"/>
       </svg>
       <div>
-        <div style={{ fontFamily:font.display, fontSize:15*size, fontWeight:800, color:fg, lineHeight:1.1, letterSpacing:-0.3 }}>
+        <div style={{ fontFamily:font.display, fontSize:18, fontWeight:800, color:fg, lineHeight:1.1, letterSpacing:-0.5 }}>
           Work <span style={{ color:'#C8553D' }}>Uptown</span>
         </div>
-        <div style={{ fontFamily:font.body, fontSize:8.5*size, color:dark?'rgba(255,255,255,0.38)':C.muted, letterSpacing:1.5, marginTop:2 }}>
+        <div style={{ fontFamily:font.body, fontSize:9, color:dark?'rgba(255,255,255,0.4)':C.muted, letterSpacing:2, marginTop:2 }}>
           COWORKING SERIES
         </div>
       </div>
@@ -130,14 +131,18 @@ function MonthTabs({ active, onChange }) {
 }
 
 export default function App() {
-  const [view, setView]         = useState('home')
+  const [view, setView]         = useState(() => {
+    const path = window.location.pathname;
+    if (path === '/apply' || path === '/apply/') return 'register';
+    return 'home';
+  })
   const [activeMonth, setMonth] = useState(MONTHS[0])
   const [regs, setRegs]         = useState([])
   const [loading, setLoading]   = useState(true)
   const [adminOk, setAdminOk]   = useState(false)
   const [adminPw, setAdminPw]   = useState('')
   const [adminErr, setAdminErr] = useState(false)
-  const [form, setForm]         = useState({ firstName:'', lastName:'', email:'', profession:'', neighborhood:'', heardFrom:'', whyJoin:'', memberInterest:false, interests:[] })
+  const [form, setForm]         = useState({ firstName:'', lastName:'', email:'', profession:'', neighborhood:'', heardFrom:'', whyJoin:'', lifeVision:'', wfhDays:[], inviteCode:'', memberInterest:false, interests:[] })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSub]    = useState(false)
   const [submitErr, setSubErr]  = useState('')
@@ -164,62 +169,187 @@ const AdminView = () => {
       </div>
     );
     const memCount = regs.filter(r=>r.member_interest).length;
-    const csv = ['First,Last,Email,Profession,Neighborhood,Why Join,Interests,Member Interest,Registered']
-      .concat(regs.map(r=>`${r.first_name},${r.last_name},${r.email},${r.profession},${r.neighborhood},"${r.why_join||''}","${r.interests||''}",${r.member_interest?'Yes':'No'},${new Date(r.registered_at).toLocaleDateString()}`))
+    const csv = ['First,Last,Email,Profession,Neighborhood,WFH Days,Why Join,Life Vision,Invite Code,Interests,Member Interest,Registered']
+      .concat(regs.map(r=>`${r.first_name},${r.last_name},${r.email},${r.profession},${r.neighborhood},"${r.wfh_days||''}","${r.why_join||''}","${r.life_vision||''}","${r.invite_code||''}","${r.interests||''}",${r.member_interest?'Yes':'No'},${new Date(r.registered_at).toLocaleDateString()}`))
       .join('\n');
+
+    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const partners = [...new Set(regs.map(r=>r.invite_code?.split('-')[0]).filter(Boolean))];
+
+    const filtered = regs.filter(r => {
+      const dayMatch = dayFilter === 'all' || (r.wfh_days && r.wfh_days.includes(dayFilter));
+      const partnerMatch = partnerFilter === 'all' || (r.invite_code && r.invite_code.startsWith(partnerFilter));
+      return dayMatch && partnerMatch;
+    });
+
     return (
-      <div style={{ maxWidth:820, margin:'0 auto', padding:'48px 40px' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:32 }}>
+      <div style={{ maxWidth:900, margin:'0 auto', padding:'40px 32px' }}>
+
+        {/* Header */}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24 }}>
           <div>
-            <Pill color={C.terra} style={{ marginBottom:12 }}>Admin</Pill>
-            <h1 style={{ fontFamily:font.display, fontSize:28, color:C.ink, fontWeight:800 }}>Applications</h1>
+            <Pill color={C.terra} style={{ marginBottom:10 }}>Admin</Pill>
+            <h1 style={{ fontFamily:font.display, fontSize:28, color:C.ink, fontWeight:800 }}>Curation Dashboard</h1>
           </div>
           <Btn variant="dark" onClick={()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`workuptown-${activeMonth}.csv`;a.click()}}
             style={{ fontSize:13, padding:'10px 20px' }}>⬇ Export CSV</Btn>
         </div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:32 }}>
+
+        {/* Stats */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10, marginBottom:24 }}>
           {[
-            {label:'Applications', val:regs.length,  color:C.sage},
-            {label:'Spots left',   val:Math.max(0,EVENTS[activeMonth].spots-regs.length), color:C.terra},
-            {label:'Want membership', val:memCount,  color:C.gold},
-            {label:'AI interest', val:regs.filter(r=>r.interests&&r.interests.includes('Intro to AI')).length, color:C.lavender},
+            {label:'Applications', val:regs.length, color:C.sage},
+            {label:'Spots left', val:Math.max(0,EVENTS[activeMonth].spots-regs.length), color:C.terra},
+            {label:'Curated', val:curated.length, color:C.gold},
+            {label:'With invite code', val:regs.filter(r=>r.invite_code).length, color:C.lavender},
+            {label:'Want membership', val:memCount, color:C.sage},
           ].map((s,i)=>(
-            <div key={i} style={{ background:'#fff', border:`1.5px solid ${C.border}`, borderRadius:12, padding:'18px 20px' }}>
-              <div style={{ fontFamily:font.display, fontSize:32, fontWeight:800, color:s.color }}>{loading?'–':s.val}</div>
-              <div style={{ fontFamily:font.body, fontSize:10, color:C.muted, marginTop:4, letterSpacing:1, fontWeight:600 }}>{s.label.toUpperCase()}</div>
+            <div key={i} style={{ background:'#fff', border:`1.5px solid ${C.border}`, borderRadius:12, padding:'16px' }}>
+              <div style={{ fontFamily:font.display, fontSize:28, fontWeight:800, color:s.color }}>{loading?'–':s.val}</div>
+              <div style={{ fontFamily:font.body, fontSize:9, color:C.muted, marginTop:3, letterSpacing:1, fontWeight:600 }}>{s.label.toUpperCase()}</div>
             </div>
           ))}
         </div>
-        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-          {regs.map((r,i)=>(
-            <div key={i} style={{ background:'#fff', border:`1.5px solid ${C.border}`, borderRadius:12, padding:'16px 20px' }}>
-              <div style={{ display:'grid', gridTemplateColumns:'auto 1fr 1fr auto', gap:16, alignItems:'center', marginBottom:r.why_join?10:0 }}>
-                <Avatar name={`${r.first_name} ${r.last_name}`} size={34}/>
-                <div>
-                  <div style={{ fontFamily:font.display, fontSize:14, fontWeight:700 }}>{r.first_name} {r.last_name}</div>
-                  <div style={{ fontFamily:font.body, fontSize:11, color:C.muted, marginTop:2 }}>{r.email}</div>
-                </div>
-                <div>
-                  <div style={{ fontFamily:font.body, fontSize:12, color:C.neutral }}>{r.profession}</div>
-                  <div style={{ fontFamily:font.body, fontSize:11, color:C.muted, marginTop:2 }}>{r.neighborhood}</div>
-                </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:4, alignItems:'flex-end' }}>
-                  {r.member_interest && <Pill color={C.sage} style={{ fontSize:9 }}>MEMBER</Pill>}
-                  {r.interests && r.interests.split(',').map(int=>int.trim()).filter(Boolean).map((int,ii)=>(
-                    <Pill key={ii} color={C.lavender} style={{ fontSize:9 }}>{int}</Pill>
-                  ))}
-                </div>
-              </div>
-              {r.why_join && (
-                <div style={{ background:C.bg, borderRadius:8, padding:'10px 14px',
-                  fontFamily:font.body, fontSize:12, color:C.neutral, lineHeight:1.6,
-                  borderLeft:`3px solid ${C.terra}` }}>
-                  <span style={{ fontWeight:600, color:C.muted, fontSize:10, letterSpacing:1, textTransform:'uppercase' }}>Why they want to join: </span>
-                  {r.why_join}
-                </div>
-              )}
-            </div>
+
+        {/* Tabs */}
+        <div style={{ display:'flex', gap:6, marginBottom:20 }}>
+          {[['applications','All Applications'],['curate','Curate Session']].map(([t,l])=>(
+            <button key={t} onClick={()=>setAdminTab(t)} style={{
+              background: adminTab===t ? C.ink : 'transparent',
+              color: adminTab===t ? '#fff' : C.muted,
+              border:`1.5px solid ${adminTab===t?C.ink:C.border}`,
+              borderRadius:99, padding:'7px 18px', fontFamily:font.body,
+              fontSize:13, fontWeight:500, cursor:'pointer',
+            }}>{l}</button>
           ))}
+        </div>
+
+        {/* Filters */}
+        <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap', alignItems:'center' }}>
+          <span style={{ fontFamily:font.body, fontSize:11, color:C.muted, fontWeight:600, letterSpacing:1 }}>FILTER BY DAY:</span>
+          {['all',...DAYS].map(d=>(
+            <button key={d} onClick={()=>setDayFilter(d)} style={{
+              padding:'5px 14px', borderRadius:99, fontFamily:font.body, fontSize:12,
+              background: dayFilter===d ? C.sage : 'transparent',
+              color: dayFilter===d ? '#fff' : C.muted,
+              border:`1.5px solid ${dayFilter===d?C.sage:C.border}`,
+              cursor:'pointer', transition:'all 0.15s',
+            }}>{d==='all'?'All days':d}</button>
+          ))}
+        </div>
+
+        {partners.length > 0 && (
+          <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap', alignItems:'center' }}>
+            <span style={{ fontFamily:font.body, fontSize:11, color:C.muted, fontWeight:600, letterSpacing:1 }}>FILTER BY PARTNER:</span>
+            {['all',...partners].map(p=>(
+              <button key={p} onClick={()=>setPartnerFilter(p)} style={{
+                padding:'5px 14px', borderRadius:99, fontFamily:font.body, fontSize:12,
+                background: partnerFilter===p ? C.lavender : 'transparent',
+                color: partnerFilter===p ? '#fff' : C.muted,
+                border:`1.5px solid ${partnerFilter===p?C.lavender:C.border}`,
+                cursor:'pointer',
+              }}>{p==='all'?'All partners':p}</button>
+            ))}
+          </div>
+        )}
+
+        {curated.length > 0 && adminTab === 'curate' && (
+          <div style={{ background:C.sage, borderRadius:12, padding:'14px 20px', marginBottom:20,
+            display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <span style={{ fontFamily:font.body, fontSize:14, color:'#fff', fontWeight:600 }}>
+              {curated.length} member{curated.length>1?'s':''} curated for this session
+            </span>
+            <Btn variant="ghost" style={{ padding:'8px 20px', fontSize:13, border:'1.5px solid rgba(255,255,255,0.3)' }}
+              onClick={()=>alert(`Ready to invite:\n${regs.filter(r=>curated.includes(r.id)).map(r=>`${r.first_name} ${r.last_name} — ${r.email}`).join('\n')}`)}>
+              View invite list →
+            </Btn>
+          </div>
+        )}
+
+        {/* Applications */}
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          {filtered.length === 0 && (
+            <div style={{ textAlign:'center', padding:48, color:C.muted, fontFamily:font.body, fontStyle:'italic' }}>
+              No applications match this filter
+            </div>
+          )}
+          {filtered.map((r,i)=>{
+            const isCurated = curated.includes(r.id);
+            return (
+              <div key={i} style={{ background:'#fff',
+                border:`2px solid ${isCurated?C.sage:C.border}`,
+                borderRadius:14, padding:'18px 20px', transition:'all 0.15s' }}>
+
+                {/* Top row */}
+                <div style={{ display:'grid', gridTemplateColumns:'auto 1fr auto', gap:14, alignItems:'flex-start', marginBottom:12 }}>
+                  <Avatar name={`${r.first_name} ${r.last_name}`} size={40}/>
+                  <div>
+                    <div style={{ fontFamily:font.display, fontSize:16, fontWeight:700, color:C.ink }}>{r.first_name} {r.last_name}</div>
+                    <div style={{ fontFamily:font.body, fontSize:12, color:C.muted, marginTop:2 }}>{r.email} · {r.neighborhood}</div>
+                    <div style={{ fontFamily:font.body, fontSize:12, color:C.neutral, marginTop:2 }}>{r.profession}</div>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:6, alignItems:'flex-end' }}>
+                    {adminTab==='curate' && (
+                      <button onClick={()=>toggleCurate(r.id)} style={{
+                        background: isCurated ? C.sage : 'transparent',
+                        color: isCurated ? '#fff' : C.sage,
+                        border:`2px solid ${C.sage}`, borderRadius:99,
+                        padding:'6px 16px', fontFamily:font.body,
+                        fontSize:12, fontWeight:600, cursor:'pointer', transition:'all 0.15s',
+                      }}>{isCurated ? '✓ Selected' : '+ Select'}</button>
+                    )}
+                    {r.invite_code && <Pill color={C.lavender} style={{ fontSize:9 }}>{r.invite_code}</Pill>}
+                    {r.member_interest && <Pill color={C.sage} style={{ fontSize:9 }}>MEMBER</Pill>}
+                  </div>
+                </div>
+
+                {/* WFH Days */}
+                {r.wfh_days && (
+                  <div style={{ marginBottom:10 }}>
+                    <span style={{ fontFamily:font.body, fontSize:9, fontWeight:600, letterSpacing:1.5,
+                      textTransform:'uppercase', color:C.muted, marginRight:8 }}>WFH DAYS</span>
+                    {r.wfh_days.split(',').map(d=>d.trim()).filter(Boolean).map((d,di)=>(
+                      <span key={di} style={{ display:'inline-block', padding:'2px 10px', borderRadius:99,
+                        background: d===dayFilter && dayFilter!=='all' ? C.sage+'20' : C.bg,
+                        color: d===dayFilter && dayFilter!=='all' ? C.sage : C.neutral,
+                        fontFamily:font.body, fontSize:11, fontWeight:500, marginRight:4 }}>{d}</span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Interests */}
+                {r.interests && (
+                  <div style={{ marginBottom:10, display:'flex', gap:6, flexWrap:'wrap' }}>
+                    {r.interests.split(',').map(i=>i.trim()).filter(Boolean).map((int,ii)=>(
+                      <Pill key={ii} color={C.lavender} style={{ fontSize:10 }}>{int}</Pill>
+                    ))}
+                  </div>
+                )}
+
+                {/* Why join */}
+                {r.why_join && (
+                  <div style={{ background:C.bg, borderRadius:8, padding:'10px 14px', marginBottom:8,
+                    fontFamily:font.body, fontSize:12, color:C.neutral, lineHeight:1.6,
+                    borderLeft:`3px solid ${C.terra}` }}>
+                    <span style={{ fontWeight:600, color:C.muted, fontSize:9, letterSpacing:1,
+                      textTransform:'uppercase', display:'block', marginBottom:4 }}>Why they want to join</span>
+                    {r.why_join}
+                  </div>
+                )}
+
+                {/* Life vision */}
+                {r.life_vision && (
+                  <div style={{ background:`${C.sage}08`, borderRadius:8, padding:'10px 14px',
+                    fontFamily:font.body, fontSize:12, color:C.neutral, lineHeight:1.6,
+                    borderLeft:`3px solid ${C.sage}` }}>
+                    <span style={{ fontWeight:600, color:C.sage, fontSize:9, letterSpacing:1,
+                      textTransform:'uppercase', display:'block', marginBottom:4 }}>What they want their life to look like</span>
+                    {r.life_vision}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -272,7 +402,7 @@ const AdminView = () => {
           </h1>
           <p style={{ fontFamily:font.body, fontSize:14, color:'rgba(255,255,255,0.45)',
             lineHeight:1.7, maxWidth:480, marginBottom:32 }}>
-            A monthly coworking series hosted at local spots in Washington Heights.
+            A community coworking series hosted at local spots in Washington Heights.
             Work alongside your neighbors.
           </p>
           <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
@@ -498,6 +628,63 @@ const AdminView = () => {
               This helps us build the right community. Be yourself.
             </div>
           </div>
+
+          <div style={{ marginBottom:20 }}>
+            <label style={{ display:'block', fontFamily:font.body, fontSize:11, letterSpacing:1.5,
+              textTransform:'uppercase', color:C.muted, marginBottom:10, fontWeight:600 }}>
+              What does your ideal work week look like? <span style={{ color:C.terra }}>*</span>
+            </label>
+            <div style={{ fontFamily:font.body, fontSize:12, color:C.muted, marginBottom:10, lineHeight:1.5 }}>
+              Which days do you typically work from home or need a space?
+            </div>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+              {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(day => {
+                const active = (form.wfhDays||[]).includes(day);
+                return (
+                  <button key={day} type="button"
+                    onClick={() => {
+                      const curr = form.wfhDays || [];
+                      f('wfhDays', active ? curr.filter(d=>d!==day) : [...curr, day]);
+                    }}
+                    style={{
+                      padding:'8px 16px', borderRadius:99, fontFamily:font.body,
+                      fontSize:13, fontWeight:500, cursor:'pointer', transition:'all 0.15s',
+                      background: active ? C.sage : 'transparent',
+                      color: active ? '#fff' : C.ink,
+                      border: `1.5px solid ${active ? C.sage : C.border}`,
+                    }}>
+                    {active && <span style={{ marginRight:6 }}>✓</span>}
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ marginBottom:20 }}>
+            <label style={{ display:'block', fontFamily:font.body, fontSize:11, letterSpacing:1.5,
+              textTransform:'uppercase', color:C.muted, marginBottom:6, fontWeight:600 }}>
+              What do you want your life to look like? <span style={{ color:C.terra }}>*</span>
+            </label>
+            <textarea value={form.lifeVision||''} onChange={e=>f('lifeVision',e.target.value)}
+              placeholder="Where are you headed? What are you building toward? Dream big."
+              rows={4} style={{ ...inp(false), resize:'vertical', lineHeight:1.6 }}/>
+            <div style={{ fontFamily:font.body, fontSize:11, color:C.muted, marginTop:5 }}>
+              This is how we curate the room. We read every answer.
+            </div>
+          </div>
+
+          <div style={{ marginBottom:20 }}>
+            <label style={{ display:'block', fontFamily:font.body, fontSize:11, letterSpacing:1.5,
+              textTransform:'uppercase', color:C.muted, marginBottom:6, fontWeight:600 }}>
+              Founding Circle invite code
+            </label>
+            <input value={form.inviteCode||''} onChange={e=>f('inviteCode',e.target.value.toUpperCase())}
+              placeholder="e.g. QUELOTECH-01" style={{ ...inp(false), fontFamily:'monospace', letterSpacing:1 }}/>
+            <div style={{ fontFamily:font.body, fontSize:11, color:C.muted, marginTop:5 }}>
+              Have an invite code from a community partner? Enter it here.
+            </div>
+          </div>
           <div style={{ background:C.bg, border:`1.5px solid ${C.border}`, borderRadius:12,
             padding:'16px 18px', marginBottom:24, display:'flex', gap:14,
             alignItems:'flex-start', cursor:'pointer' }}
@@ -523,7 +710,7 @@ const AdminView = () => {
           {submitErr && <div style={{ background:'#FEE2E2', borderRadius:8, padding:'10px 14px',
             fontFamily:font.body, fontSize:13, color:'#DC2626', marginBottom:16 }}>{submitErr}</div>}
           <Btn onClick={async()=>{
-            if(!form.firstName||!form.lastName||!form.email||!form.profession||!form.neighborhood||!form.whyJoin){setSubErr('Please fill in all required fields.');return;}
+            if(!form.firstName||!form.lastName||!form.email||!form.profession||!form.neighborhood||!form.whyJoin||!form.lifeVision||!(form.wfhDays||[]).length){setSubErr('Please fill in all required fields.');return;}
             setSub(true);setSubErr('');
             try{
               const isDupe = await checkDuplicateEmail(form.email, activeMonth);
@@ -532,10 +719,13 @@ const AdminView = () => {
                 month_key:activeMonth, first_name:form.firstName, last_name:form.lastName,
                 email:form.email, profession:form.profession, neighborhood:form.neighborhood,
                 heard_from:form.heardFrom, member_interest:form.memberInterest,
-                why_join:form.whyJoin, interests:(form.interests||[]).join(', ')
+                why_join:form.whyJoin, life_vision:form.lifeVision,
+                wfh_days:(form.wfhDays||[]).join(', '),
+                invite_code:form.inviteCode,
+                interests:(form.interests||[]).join(', ')
               });
               setRegs(p=>[...p,saved]);
-              setForm({firstName:'',lastName:'',email:'',profession:'',neighborhood:'',heardFrom:'',whyJoin:'',memberInterest:false,interests:[]});
+              setForm({firstName:'',lastName:'',email:'',profession:'',neighborhood:'',heardFrom:'',whyJoin:'',lifeVision:'',wfhDays:[],inviteCode:'',memberInterest:false,interests:[]});
               setSubmitted(true);
             }catch(err){setSubErr('Something went wrong. Please try again.')}
             setSub(false);
@@ -596,7 +786,7 @@ const AdminView = () => {
       {view==='directory' && <DirectoryView/>}
       {view==='admin'     && <AdminView/>}
       <footer style={{ background:C.ink, padding:'32px 40px', textAlign:'center', marginTop:60 }}>
-        <Logo dark={true} size={0.9}/>
+        <Logo dark={true}/>
         <p style={{ fontFamily:font.body, fontSize:12, color:'rgba(255,255,255,0.25)', marginTop:16 }}>
           Support local. Build together. · Washington Heights, NYC
         </p>
